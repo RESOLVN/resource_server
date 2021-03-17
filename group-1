@@ -1,0 +1,119 @@
+version: "3"
+
+networks:
+  gitea:
+    external: false
+
+services:
+
+  mm-db:
+    image: resolvn/postgres:12.6
+    container_name: mattermost-postgresql
+    restart: unless-stopped
+    volumes:
+      - /home/resolvn/docker/mattermost/postgresql/data:/var/lib/postgresql/data
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - POSTGRES_USER=resolvn
+      - POSTGRES_PASSWORD=resolvn!resolvn!
+      - POSTGRES_DB=mattermost
+  
+  mm-app:
+    image: resolvn/mattermost:5.33
+    container_name: mattermost-app
+    ports:
+      - "8065:8065" 
+    restart: unless-stopped
+    volumes:
+      - /home/resolvn/docker/mattermost/config:/mattermost/config:rw
+      - /home/resolvn/docker/mattermost/data:/mattermost/data:rw
+      - /home/resolvn/docker/mattermost/logs:/mattermost/logs:rw
+      - /home/resolvn/docker/mattermost/plugins:/mattermost/plugins:rw
+      - /home/resolvn/docker/mattermost/client-plugins:/mattermost/client/plugins:rw
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - MM_USERNAME=resolvn
+      - MM_PASSWORD=resolvn!resolvn!
+      - MM_DBNAME=mattermost
+      - MM_SQLSETTINGS_DATASOURCE=postgres://resolvn:resolvn!resolvn!@mm-db:5432/mattermost?sslmode=disable&connect_timeout=10
+
+  postgresql:
+    image: resolvn/bitnami-postgres:13.2
+    container_name: redmine-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRESQL_USERNAME=resolvn
+      - ALLOW_EMPTY_PASSWORD=yes
+      - POSTGRESQL_DATABASE=redmine
+    volumes:
+      - /home/resolvn/docker/redmine/postgres:/bitnami/postgresql
+      - /etc/localtime:/etc/localtime:ro
+
+  redmine:
+    image: resolvn/redmine:4.1.1
+    container_name: redmine-app
+    restart: unless-stopped
+    ports:
+      - "8000:3000"
+    environment:
+      - REDMINE_DB_POSTGRES=postgresql
+      - REDMINE_DB_USERNAME=bn_resolvn
+      - REDMINE_DB_NAME=redmine
+      - REDMINE_USERNAME=resolvn
+      - REDMINE_PASSWORD=Resolvn1!Resolvn1!
+    volumes:
+      - /home/resolvn/docker/redmine/redmine_data:/bitnami
+    depends_on:
+      - postgresql
+  
+  nextcloud:
+    image: resolvn/nextcloud:21.0.0
+    container_name: nextcloud
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+    volumes:
+      - /home/resolvn/docker/nextcloud/config:/config
+      - /home/resolvn/docker/nextcloud/data:/data     
+    ports:
+      - "8855:443"
+    restart: unless-stopped
+ 
+  gitea-web:
+    image: resolvn/gitea:1.13.3
+    container_name: gitea-web
+    networks: 
+      - gitea
+    volumes:
+      - /home/resolvn/docker/gitea/data:/data
+      - /home/resolvn/docker/gitea/config:/etc/gitea  
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "3000:3000"
+      - "2222:22"
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - DB_TYPE=postgres
+      - DB_HOST=gitea-database:5432
+      - DB_NAME=gitea
+      - DB_USER=gitea
+      - DB_PASSWD=gitea
+    depends_on:
+      - gitea-database
+    restart: unless-stopped
+
+  gitea-database:
+    image: resolvn/postgres:12.6
+    container_name: gitea-database
+    networks:
+      - gitea
+    environment:
+      - POSTGRES_USER=gitea
+      - POSTGRES_PASSWORD=gitea
+      - POSTGRES_DB=gitea
+    volumes:
+      - /home/resolvn/docker/gitea/postgresql:/var/lib/postgresql/data
+    restart: unless-stopped

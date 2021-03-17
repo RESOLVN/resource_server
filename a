@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+
+  JupyterLab:
+    image: resolvn/jupyter-pyspark:latest
+    container_name: jupyterlab
+    volumes:
+      - /home/resolvn/docker/jupyterlab:/home/jovyan/work
+    environment:
+      - JUPYTER_TOKEN=resolvn
+      - JUPYTER_ENABLE_LAB=yes
+    ports:
+      - "4040:4040"
+      - "8888:8888"
+    restart: unless-stopped

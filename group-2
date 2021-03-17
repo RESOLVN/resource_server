@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+
+  JupyterLab:
+    image: resolvn/jupyter-pyspark:latest
+    container_name: jupyterlab
+    volumes:
+      - /home/resolvn/docker/jupyterlab:/home/jovyan/work
+    environment:
+      - JUPYTER_TOKEN=resolvn
+      - JUPYTER_ENABLE_LAB=yes
+    ports:
+      - "4040:4040"
+      - "8888:8888"
+    restart: unless-stopped
+  
+  diagrams-drawio:
+    image: resolvn/draw.io:14.1.9
+    container_name: diagrams-drawio    
+    volumes:
+      - /home/resolvn/docker/draw.io:/usr/local/diagrams
+    ports:
+      - "8010:8080"
+    restart: unless-stopped
+
+  cyberchef:
+    image: resolvn/cyberchef:9.27.6
+    container_name: cyberchef   
+    ports:
+      - "8020:8000"
+    restart: unless-stopped
