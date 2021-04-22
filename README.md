@@ -27,7 +27,7 @@ l. Confluence (ports 8090, 8091) *
 m. VECTR (port 8081) *  
 
 ---
-####  ALL SERVERS with '\*' HAVE DEFAULT ACCOUNT CREDENTIALS BELOW
+####  ALL SERVERS WITH '\*' HAVE DEFAULT ACCOUNT CREDENTIALS BELOW
 
 Username: **resolvn**  
 Password: **Resolvn1!Resolvn1!**
